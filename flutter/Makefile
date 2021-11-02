@@ -155,6 +155,12 @@ else
 backend_replace_example=
 endif
 
+ifeq (${ENABLE_BACKEND_OPENVINO},1)
+backend_replace_example=\'ov_mlperf\',
+else
+backend_replace_example=
+endif
+
 ifeq (${ENABLE_BACKEND_TFLITE},0)
 backend_replace_tflite=
 else
@@ -165,6 +171,7 @@ endif
 set-supported-backends:
 	cat lib/backend/backends_list.in | sed \
 		-e "s/EXAMPLE_TAG/${backend_replace_example}/" \
+		-e "s/OPENVINO_TAG/${backend_replace_openvino}/" \
 		-e "s/TFLITE_TAG/${backend_replace_tflite}/" \
 		> lib/backend/backends_list.gen.dart
 

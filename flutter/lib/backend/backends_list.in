@@ -2,5 +2,6 @@ part of 'bridge.dart';
 
 const _backendsList = [
     EXAMPLE_TAG
+    OPENVINO_TAG
     TFLITE_TAG
 ];

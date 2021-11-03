@@ -25,7 +25,10 @@ _bazel_ios_fw := bazel-bin/cpp/flutter/ios_backend_fw_static_archive-root/ios_ba
 _xcode_fw := ios/Flutter/ios_backend_fw_static.framework
 
 .PHONY: windows
-windows: backend-bridge-windows backends/tflite-windows prepare-flutter
+windows: backend-bridge-windows backends/openvino-windows prepare-flutter
+
+# .PHONY: windows/intel
+# windows: backend-bridge-windows backends/openvino-windows prepare-flutter
 
 debug_flags_windows=-c dbg --copt /Od --copt /Z7 --linkopt -debug
 
@@ -149,11 +152,15 @@ backends/tflite-android:
 	rm -f android/app/src/main/jniLibs/arm64-v8a/libtflitebackend.so
 	cp bazel-bin/cpp/backend_tflite/libtflitebackend.so android/app/src/main/jniLibs/arm64-v8a/libtflitebackend.so
 
-ifeq (${ENABLE_BACKEND_EXAMPLE},1)
-backend_replace_example=\'example\',
-else
-backend_replace_example=
-endif
+.PHONY: backends/openvino-windows
+backends/openvino-windows:
+	cp cpp/backend_openvino/common/Release/ov_mlperf.dll windows/ov_mlperf.dll
+
+# ifeq (${ENABLE_BACKEND_EXAMPLE},1)
+# backend_replace_example=\'example\',
+# else
+# backend_replace_example=
+# endif
 
 ifeq (${ENABLE_BACKEND_OPENVINO},1)
 backend_replace_example=\'ov_mlperf\',

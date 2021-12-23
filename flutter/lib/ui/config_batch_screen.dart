@@ -33,6 +33,30 @@ class _ConfigBatchScreen extends State<ConfigBatchScreen> {
     final element = store
         .getBenchmarkList()
         .firstWhere((benchmark) => benchmark.id == widget.id);
+    if (element.batchSize > maxBatchThreadsValue) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(stringResources.configBatchTitle),
+        ),
+        body: ListView(
+            padding: const EdgeInsets.only(top: 20),
+            children: <Widget>[
+              ListTile(
+                title: Padding(
+                  padding: const EdgeInsets.only(bottom: 5),
+                  child: Text(
+                    element.description,
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+                subtitle: Text(
+                  stringResources.configBatchSize
+                      .replaceAll('<batchSize>', element.batchSize.toString()),
+                ),
+              ),
+            ]),
+      );
+    }
     _maxBatchSize = maxBatchThreadsValue ~/ element.threadsNumber;
 
     var presets = state.resourceManager.getBatchPresets();

@@ -255,6 +255,10 @@ class BenchmarkState extends ChangeNotifier {
       BatchPreset? batchPreset;
       if (item.modelConfig.scenario == 'Offline') {
         var presetList = resourceManager.getBatchPresets();
+        // TODO refactor presets mechanism
+        var constrainedBatchSize = min(item.benchmarkSetting.batchSize, 128);
+        presetList[1] = BatchPreset(
+            name: 'custom', batchSize: constrainedBatchSize, shardsCount: 1);
 
         if (Platform.isIOS) {
           var iosInfo = await DeviceInfoPlugin().iosInfo;
@@ -265,8 +269,10 @@ class BenchmarkState extends ChangeNotifier {
               break;
             }
           }
+          batchPreset ??= presetList[0];
         }
-        batchPreset ??= presetList[0];
+        // For non-iOS platforms use custom preset as default, to respect backend settings
+        batchPreset ??= presetList[1];
       }
 
       _store.addBenchmarkToList(item.id, item.taskName, batchPreset);

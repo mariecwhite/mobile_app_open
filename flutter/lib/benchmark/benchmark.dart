@@ -78,10 +78,13 @@ class MiddleInterface {
       } else if (Platform.isAndroid) {
         backendPath = '$backendPath.so';
       }
+      print('checking backend $backendPath...');
       final backendSetting = await native_backend.backendMatch(backendPath);
       if (backendSetting != null) {
+        print('using backend $backendPath');
         return MapEntry(backendSetting, backendPath);
       }
+      print('skipping backend $backendPath');
     }
     // try built-in backend
     final backendSetting = await native_backend.backendMatch('');

@@ -259,9 +259,8 @@ class BenchmarkState extends ChangeNotifier {
       if (item.modelConfig.scenario == 'Offline') {
         var presetList = resourceManager.getBatchPresets();
         // TODO refactor presets mechanism
-        var constrainedBatchSize = min(item.benchmarkSetting.batchSize, 128);
         presetList[1] = BatchPreset(
-            name: 'custom', batchSize: constrainedBatchSize, shardsCount: 1);
+            name: 'custom', batchSize: item.benchmarkSetting.batchSize, shardsCount: 1);
 
         if (Platform.isIOS) {
           var iosInfo = await DeviceInfoPlugin().iosInfo;

@@ -53,13 +53,14 @@ flutter_common_docker_flags= \
 
 .PHONY: flutter/android/apk
 flutter/android/apk: flutter/android
-	cd flutter && flutter clean
-	cd flutter && flutter build apk
+	cd flutter && flutter --no-version-check clean
+	cd flutter && flutter --no-version-check build apk
 	mkdir -p output/flutter/android/
 	cp -f flutter/build/app/outputs/flutter-apk/app-release.apk output/flutter/android/release.apk
 
 .PHONY: docker/flutter/android/apk
 docker/flutter/android/apk: flutter/android/docker/image
+	cd flutter && ${_start_args} flutter --no-version-check clean
 	MSYS2_ARG_CONV_EXCL="*" docker run \
 		${flutter_common_docker_flags} \
 		make flutter/android/apk

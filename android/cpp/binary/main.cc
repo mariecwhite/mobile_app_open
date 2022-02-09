@@ -39,6 +39,7 @@ enum class BackendType {
   NONE = 0,
   TFLITE = 1,
   EXTERNAL = 2,
+  IREE = 3,
 };
 
 BackendType Str2BackendType(absl::string_view name) {
@@ -46,6 +47,8 @@ BackendType Str2BackendType(absl::string_view name) {
     return BackendType::TFLITE;
   } else if (absl::EqualsIgnoreCase(name, "EXTERNAL")) {
     return BackendType::EXTERNAL;
+  } else if (absl::EqualsIgnoreCase(name, "IREE")) {
+    return BackendType::IREE;
   } else {
     return BackendType::NONE;
   }
@@ -179,6 +182,43 @@ int Main(int argc, char* argv[]) {
 
         ExternalBackend* external_backend = new ExternalBackend(
             model_file_path, lib_path, setting_list, native_lib_path);
+        backend.reset(external_backend);
+      }
+    } break;
+    case BackendType::IREE: {
+      LOG(INFO) << "Using IREE Backend.";
+      std::string iree_module_path;
+      std::string lib_path;
+      flag_list.insert(
+          flag_list.end(),
+          {Flag::CreateFlag("module", &iree_module_path,
+                            "Path to IREE .vmfb file.", Flag::kRequired),
+           Flag::CreateFlag("lib_path", &lib_path,
+                            "Path to the backend library .so file.", Flag::kRequired)});
+
+      if (Flags::Parse(&argc, const_cast<const char**>(argv), flag_list)) {
+        const char* pbdata;
+        std::string msg = mlperf::mobile::BackendFunctions::isSupported(
+              lib_path, "", iree_module_path, &pbdata);
+        std::string backend_setting_string(pbdata, strlen(pbdata));
+        BackendSetting backend_setting;
+        google::protobuf::TextFormat::ParseFromString(pbdata, &backend_setting);
+
+        std::string benchmark_id;
+        switch (dataset_type) {
+          case DatasetConfig::SQUAD:
+            benchmark_id = "mobilebert";
+            break;
+          default:
+            LOG(INFO) << "Not yet supported";
+            break;
+        }
+
+        SettingList setting_list =
+              createSettingList(backend_setting, benchmark_id);
+
+        ExternalBackend* external_backend = new ExternalBackend(
+            iree_module_path, lib_path, setting_list, "");
         backend.reset(external_backend);
       }
     } break;

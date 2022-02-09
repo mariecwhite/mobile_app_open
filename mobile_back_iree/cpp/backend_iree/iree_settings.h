@@ -18,77 +18,29 @@ limitations under the License.
 #define IREE_SETTINGS_H
 
 const std::string iree_settings = R"SETTINGS(
-common_setting {
-  id: "num_threads"
-  name: "Number of threads"
-  value {
-    value: "2"
-    name: "2 threads"
+benchmark_setting {
+  benchmark_id: "mobilebert"
+  accelerator: ""
+  accelerator_desc: ""
+  configuration: "MobileBert"
+  src: ""
+  custom_setting {
+    id: "driver"
+    value: "dylib"
   }
-  acceptable_value {
-    value: "1"
-    name: "Single thread"
+  custom_setting {
+    id: "entry_function"
+    value: "module.main"
   }
-  acceptable_value {
-    value: "2"
-    name: "2 threads"
+  custom_setting {
+    id: "function_inputs"
+    value: "1x384xi32,1x384xi32,1x384xi32"
   }
-  acceptable_value {
-    value: "4"
-    name: "4 threads"
-  }
-  acceptable_value {
-    value: "8"
-    name: "8 threads"
-  }
-  acceptable_value {
-    value: "16"
-    name: "16 threads"
+  custom_setting {
+    id: "function_outputs"
+    value: "1x384xf32,1x384xf32"
   }
 }
-
-common_setting {
-  id: "configuration"
-  name: "Configuration"
-  value {
-    value: "IREE runtime using dylib backend."
-    name: "Default"
-  }
-}
-
-common_setting {
-  id: "share_results"
-  name: "Share results"
-  value {
-    value: "0"
-    name: "false"
-  }
-  acceptable_value {
-    value: "1"
-    name: "true"
-  }
-  acceptable_value {
-    value: "0"
-    name: "false"
-  }
-}
-
-common_setting {
-  id: "cooldown"
-  name: "Cooldown"
-  value {
-    value: "0"
-    name: "false"
-  }
-  acceptable_value {
-    value: "1"
-    name: "true"
-  }
-  acceptable_value {
-    value: "0"
-    name: "false"
-  }
-}
-})SETTINGS";
+)SETTINGS";
 
 #endif  // IREE_SETTINGS_H

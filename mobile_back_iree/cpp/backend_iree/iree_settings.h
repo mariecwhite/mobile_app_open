@@ -19,10 +19,10 @@ limitations under the License.
 
 const std::string iree_settings = R"SETTINGS(
 benchmark_setting {
-  benchmark_id: "mobilebert"
+  benchmark_id: "squad"
   accelerator: ""
   accelerator_desc: ""
-  configuration: "MobileBert"
+  configuration: "Squad"
   src: ""
   custom_setting {
     id: "driver"
@@ -39,6 +39,29 @@ benchmark_setting {
   custom_setting {
     id: "function_outputs"
     value: "1x384xf32,1x384xf32"
+  }
+}
+benchmark_setting {
+  benchmark_id: "imagenet"
+  accelerator: ""
+  accelerator_desc: ""
+  configuration: "Imagenet"
+  src: ""
+  custom_setting {
+    id: "driver"
+    value: "dylib"
+  }
+  custom_setting {
+    id: "entry_function"
+    value: "module.main"
+  }
+  custom_setting {
+    id: "function_inputs"
+    value: "1x224x224x3xf32"
+  }
+  custom_setting {
+    id: "function_outputs"
+    value: "1x1001xf32"
   }
 }
 )SETTINGS";

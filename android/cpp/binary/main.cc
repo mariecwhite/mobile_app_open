@@ -156,19 +156,16 @@ int Main(int argc, char* argv[]) {
               benchmark_id = "IC_tpu_uint8_offline";
             else
               benchmark_id = "IC_tpu_uint8";
-          }; break;
-          case DatasetConfig::COCO:
-            benchmark_id = "OD_uint8";
+          };
             break;
-          case DatasetConfig::SQUAD:
-            benchmark_id = "LU_float32";
+          case DatasetConfig::COCO:benchmark_id = "OD_uint8";
             break;
-          case DatasetConfig::ADE20K:
-            benchmark_id = "IS_uint8";
+          case DatasetConfig::SQUAD:benchmark_id = "LU_float32";
+            break;
+          case DatasetConfig::ADE20K:benchmark_id = "IS_uint8";
             break;
           case DatasetConfig::NONE:
-          default:
-            LOG(INFO) << "how come";
+          default:LOG(INFO) << "how come";
             break;
         }
 
@@ -177,14 +174,14 @@ int Main(int argc, char* argv[]) {
 
         // If batch size is not specified the default is 0, so set to 1
         batch_size = setting_list.benchmark_setting().batch_size() == 0
-                         ? 1
-                         : setting_list.benchmark_setting().batch_size();
+                     ? 1
+                     : setting_list.benchmark_setting().batch_size();
 
         ExternalBackend* external_backend = new ExternalBackend(
             model_file_path, lib_path, setting_list, native_lib_path);
         backend.reset(external_backend);
       }
-    } break;
+      break;
     case BackendType::IREE: {
       LOG(INFO) << "Using IREE Backend.";
       std::string iree_module_path;
@@ -193,37 +190,39 @@ int Main(int argc, char* argv[]) {
           flag_list.end(),
           {Flag::CreateFlag("module", &iree_module_path,
                             "Path to IREE .vmfb file.", Flag::kRequired),
-           Flag::CreateFlag("lib_path", &lib_path,
-                            "Path to the backend library .so file.", Flag::kRequired)});
+           Flag::CreateFlag("lib_path",
+                            &lib_path,
+                            "Path to the backend library .so file.",
+                            Flag::kRequired)});
 
       if (Flags::Parse(&argc, const_cast<const char**>(argv), flag_list)) {
         const char* pbdata;
         std::string msg = mlperf::mobile::BackendFunctions::isSupported(
-              lib_path, "", iree_module_path, &pbdata);
+            lib_path, "", iree_module_path, &pbdata);
         std::string backend_setting_string(pbdata, strlen(pbdata));
         BackendSetting backend_setting;
         google::protobuf::TextFormat::ParseFromString(pbdata, &backend_setting);
 
         std::string benchmark_id;
         switch (dataset_type) {
-          case DatasetConfig::SQUAD:
-            benchmark_id = "mobilebert";
+          case DatasetConfig::SQUAD:benchmark_id = "squad";
             break;
-          default:
-            LOG(INFO) << "Not yet supported";
+          case DatasetConfig::IMAGENET:benchmark_id = "imagenet";
+            break;
+          default:LOG(INFO) << "Not yet supported";
             break;
         }
 
         SettingList setting_list =
-              createSettingList(backend_setting, benchmark_id);
+            createSettingList(backend_setting, benchmark_id);
 
         ExternalBackend* external_backend = new ExternalBackend(
             iree_module_path, lib_path, setting_list, "");
         backend.reset(external_backend);
       }
-    } break;
-    default:
-      break;
+    }
+    break;
+    default:break;
   }
 
   // Command Line Flags for dataset.
@@ -260,7 +259,8 @@ int Main(int argc, char* argv[]) {
       // Adds to flag_list for showing help.
       flag_list.insert(flag_list.end(), dataset_flags.begin(),
                        dataset_flags.end());
-    } break;
+    }
+      break;
     case DatasetConfig::COCO: {
       LOG(INFO) << "Using Coco dataset";
       std::string images_directory, groundtruth_file;
@@ -291,7 +291,8 @@ int Main(int argc, char* argv[]) {
       // Adds to flag_list for showing help.
       flag_list.insert(flag_list.end(), dataset_flags.begin(),
                        dataset_flags.end());
-    } break;
+    }
+      break;
     case DatasetConfig::SQUAD: {
       LOG(INFO) << "Using SQuAD 1.1 dataset for MobileBert.";
       std::string input_tfrecord, gt_tfrecord;
@@ -313,7 +314,8 @@ int Main(int argc, char* argv[]) {
       // Adds to flag_list for showing help.
       flag_list.insert(flag_list.end(), dataset_flags.begin(),
                        dataset_flags.end());
-    } break;
+    }
+      break;
     case DatasetConfig::ADE20K: {
       LOG(INFO) << "Using ADE20K dataset";
       std::string images_directory, ground_truth_directory;
@@ -339,10 +341,10 @@ int Main(int argc, char* argv[]) {
       // Adds to flag_list for showing help.
       flag_list.insert(flag_list.end(), dataset_flags.begin(),
                        dataset_flags.end());
-    } break;
-    case DatasetConfig::NONE:
-    default:
+    }
       break;
+    case DatasetConfig::NONE:
+    default:break;
   }
 
   // Show usage if needed.

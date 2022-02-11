@@ -45,6 +45,8 @@ struct IreeBackendData {
   int32_t output_count = 0;
   std::vector<iree_hal_buffer_t*> output_buffers;
   std::vector<mlperf_data_t> output_types;
+
+  int32_t num_queries = 0;
 };
 
 static bool backendExists = false;
@@ -284,6 +286,7 @@ const char* mlperf_backend_name(mlperf_backend_ptr_t backend_ptr) {
 // Destroy the backend pointer and its data.
 void mlperf_backend_delete(mlperf_backend_ptr_t backend_ptr) {
   IreeBackendData* backend_data = (IreeBackendData*) backend_ptr;
+  printf("Number of queries issued: %d\n", backend_data->num_queries);
   cleanup(backend_data);
 }
 
@@ -297,6 +300,7 @@ mlperf_status_t mlperf_backend_issue_query(mlperf_backend_ptr_t backend_ptr) {
     iree_status_fprint(stderr, status);
     return MLPERF_FAILURE;
   }
+  ++backend_data->num_queries;
   return MLPERF_SUCCESS;
 }
 

@@ -181,11 +181,13 @@ int Main(int argc, char* argv[]) {
             model_file_path, lib_path, setting_list, native_lib_path);
         backend.reset(external_backend);
       }
-      break;
+    } break;
     case BackendType::IREE: {
       LOG(INFO) << "Using IREE Backend.";
       std::string iree_module_path;
       std::string lib_path;
+      std::string function_inputs;
+      std::string function_outputs;
       flag_list.insert(
           flag_list.end(),
           {Flag::CreateFlag("module", &iree_module_path,
@@ -216,13 +218,25 @@ int Main(int argc, char* argv[]) {
         SettingList setting_list =
             createSettingList(backend_setting, benchmark_id);
 
+        if (!function_inputs.empty() || !function_outputs.empty()) {
+          auto* benchmark_setting = setting_list.mutable_benchmark_setting();
+          for (auto& custom_setting : *benchmark_setting->mutable_custom_setting()) {
+            if (!function_inputs.empty() && custom_setting.id() == "function_inputs") {
+              *custom_setting.mutable_value() = function_inputs;
+            }
+            if (!function_outputs.empty() && custom_setting.id() == "function_outputs") {
+              *custom_setting.mutable_value() = function_outputs;
+            }
+          }
+        }
+
         ExternalBackend* external_backend = new ExternalBackend(
             iree_module_path, lib_path, setting_list, "");
         backend.reset(external_backend);
       }
-    }
-    break;
-    default:break;
+    } break;
+    default:
+      break;
   }
 
   // Command Line Flags for dataset.

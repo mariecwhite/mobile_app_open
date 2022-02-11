@@ -41,6 +41,7 @@ benchmark_setting {
     value: "1x384xf32,1x384xf32"
   }
 }
+
 benchmark_setting {
   benchmark_id: "imagenet"
   accelerator: ""
@@ -62,6 +63,30 @@ benchmark_setting {
   custom_setting {
     id: "function_outputs"
     value: "1x1001xf32"
+  }
+}
+
+benchmark_setting {
+  benchmark_id: "imagenet_quantized"
+  accelerator: ""
+  accelerator_desc: ""
+  configuration: "Imagenet"
+  src: ""
+  custom_setting {
+    id: "driver"
+    value: "dylib"
+  }
+  custom_setting {
+    id: "entry_function"
+    value: "module.main"
+  }
+  custom_setting {
+    id: "function_inputs"
+    value: "1x224x224x3xui8"
+  }
+  custom_setting {
+    id: "function_outputs"
+    value: "1x1001xui8"
   }
 }
 )SETTINGS";

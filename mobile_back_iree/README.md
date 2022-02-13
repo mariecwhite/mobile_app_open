@@ -84,7 +84,10 @@ MODEL_NAME=<name of model>
 
 # First generate the IREE module.
 iree-import-tflite ${BASE_DIR}/${MODEL_NAME}.tflite -o ${BASE_DIR}/${MODEL_NAME}.mlir
-iree-translate --iree-input-type=tosa --iree-mlir-to-vm-bytecode-module --iree-hal-target-backends=dylib-llvm-aot ${BASE_DIR}/${MODEL_NAME}.mlir --o ${BASE_DIR}/${MODEL_NAME}.vmfb
+
+iree-translate --iree-input-type=tosa --iree-mlir-to-vm-bytecode-module \
+--iree-hal-target-backends=dylib-llvm-aot ${BASE_DIR}/${MODEL_NAME}.mlir \
+--o ${BASE_DIR}/${MODEL_NAME}.vmfb
 
 # Now run MLPerf with the vmfb as input.
 SQUAD_ROOT=<path to SQUAD dataset>
@@ -168,3 +171,15 @@ No errors encountered during test.
 2022-02-11 13:20:45.404771: I android/cpp/binary/main.cc:387] Accuracy: 87.9930
 ```
 
+## Running a Benchmark on ARM
+
+To run on a device:
+1. Generate the .vmfb file with correct target. For example, when building for android_arm64:
+```commandline
+iree-translate --iree-input-type=tosa --iree-mlir-to-vm-bytecode-module \
+--iree-hal-target-backends=dylib-llvm-aot \
+--iree-llvm-target-triple=aarch64-none-linux-android29 \
+${BASE_DIR}/${MODEL_NAME}.mlir \
+--o ${BASE_DIR}/${MODEL_NAME}.vmfb
+```
+2. When building the backends and benchmark binary, replace --config=linux with --config=android_arm64.

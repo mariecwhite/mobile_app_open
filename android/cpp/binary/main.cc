@@ -195,7 +195,11 @@ int Main(int argc, char* argv[]) {
            Flag::CreateFlag("lib_path",
                             &lib_path,
                             "Path to the backend library .so file.",
-                            Flag::kRequired)});
+                            Flag::kRequired),
+           Flag::CreateFlag("function_inputs", &function_inputs,
+                            "The inputs to the module e.g. 1x224x224x3xui8"),
+           Flag::CreateFlag("function_outputs", &function_outputs,
+                            "The inputs to the module e.g. 1x1001xui8")});
 
       if (Flags::Parse(&argc, const_cast<const char**>(argv), flag_list)) {
         const char* pbdata;

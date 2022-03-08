@@ -89,6 +89,55 @@ benchmark_setting {
     value: "1x1001xui8"
   }
 }
+
+benchmark_setting {
+  benchmark_id: "ade20k"
+  accelerator: ""
+  accelerator_desc: ""
+  configuration: "ADE20K"
+  src: ""
+  custom_setting {
+    id: "driver"
+    value: "dylib"
+  }
+  custom_setting {
+    id: "entry_function"
+    value: "module.main"
+  }
+  custom_setting {
+    id: "function_inputs"
+    value: "1x512x512x3xf32"
+  }
+  custom_setting {
+    id: "function_outputs"
+    value: "1x512x512xi32"
+  }
+}
+
+benchmark_setting {
+  benchmark_id: "ade20k_quantized"
+  accelerator: ""
+  accelerator_desc: ""
+  configuration: "ADE20K"
+  src: ""
+  custom_setting {
+    id: "driver"
+    value: "dylib"
+  }
+  custom_setting {
+    id: "entry_function"
+    value: "module.main"
+  }
+  custom_setting {
+    id: "function_inputs"
+    value: "1x512x512x3xui8"
+  }
+  custom_setting {
+    id: "function_outputs"
+    value: "1x512x512xi32"
+  }
+}
+
 )SETTINGS";
 
 #endif  // IREE_SETTINGS_H

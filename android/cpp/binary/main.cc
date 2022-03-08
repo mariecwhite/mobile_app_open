@@ -220,6 +220,8 @@ int Main(int argc, char* argv[]) {
             break;
           case DatasetConfig::IMAGENET:benchmark_id = "imagenet";
             break;
+          case DatasetConfig::ADE20K:benchmark_id = "ade20k";
+            break;
           default:LOG(INFO) << "Not yet supported";
             break;
         }

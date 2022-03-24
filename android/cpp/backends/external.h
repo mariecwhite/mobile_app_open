@@ -129,7 +129,8 @@ class ExternalBackend : public Backend {
  public:
   ExternalBackend(const std::string& model_file_path,
                   const std::string& lib_path, const SettingList& settings,
-                  const std::string& native_lib_path);
+                  const std::string& native_lib_path,
+                  bool is_detection, const std::string& anchor_path);
 
   ~ExternalBackend() {
     backend_functions_.destroy(backend_ptr_);

@@ -43,6 +43,7 @@ cc_library(
     }),
     deps = [
         "//android/cpp/c:headers",
+        "//detection:detection_post_process",
         "@org_tensorflow//tensorflow/lite/c:c_api",
         "@org_tensorflow//tensorflow/lite/c:common",
         "@org_tensorflow//tensorflow/core:tflite_portable_logging",

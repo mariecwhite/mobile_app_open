@@ -39,6 +39,7 @@ cc_library(
     }),
     deps = [
         "//android/cpp/c:headers",
+        "//detection:detection_post_process",
         "@iree//iree/runtime",
     ],
     alwayslink = 1,

@@ -49,6 +49,8 @@ typedef struct {
   const char* accelerator;
   uint32_t batch_size;
   int count = 0;
+  const char* anchor_path;
+  bool is_detection;
   const char* keys[kMaxMLPerfBackendConfigs];
   const char* values[kMaxMLPerfBackendConfigs];
 } mlperf_backend_configuration_t;

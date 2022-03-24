@@ -147,9 +147,13 @@ BackendFunctions::BackendFunctions(const std::string& lib_path) {
 ExternalBackend::ExternalBackend(const std::string& model_file_path,
                                  const std::string& lib_path,
                                  const SettingList& settings,
-                                 const std::string& native_lib_path)
+                                 const std::string& native_lib_path,
+                                 bool is_detection,
+                                 const std::string& anchor_path)
     : backend_functions_(lib_path) {
   backend_config_ = CppToCSettings(settings);
+  backend_config_.is_detection = is_detection;
+  backend_config_.anchor_path = anchor_path.c_str();
   backend_ptr_ = backend_functions_.create(
       model_file_path.c_str(), &backend_config_, native_lib_path.c_str());
   if (!backend_ptr_) {

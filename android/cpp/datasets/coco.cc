@@ -204,11 +204,15 @@ float Coco::ComputeAccuracy() {
   }
 
   for (auto const &element : predicted_objects_) {
-    eval_stage_.SetEvalInputs(element.second,
-                              groundtruth_objects[element.first]);
-    if (eval_stage_.Run() == kTfLiteError) {
-      LOG(ERROR) << "Run evaluation stage failed";
-      return 0.0f;
+    const tflite::evaluation::ObjectDetectionResult& predictions = element.second;
+    const tflite::evaluation::ObjectDetectionResult& groundtruth = groundtruth_objects[element.first];
+    for (const auto& object : groundtruth.objects()) {
+      eval_stage_.SetEvalInputs(element.second,
+                                groundtruth_objects[element.first]);
+      if (eval_stage_.Run() == kTfLiteError) {
+        LOG(ERROR) << "Run evaluation stage failed";
+        return 0.0f;
+      }
     }
   }
 

@@ -100,7 +100,7 @@ int Main(int argc, char* argv[]) {
   command_line += " " + backend_name + " " + dataset_name;
 
   // Command Line Flags for mlperf.
-  std::string mode, scenario = "SingleStream", output_dir;
+  std::string mode, scenario = "SingleStream", output_dir, anchor_path;
   int min_query_count = 100, min_duration = 100;
   flag_list.clear();
   flag_list.insert(
@@ -116,7 +116,10 @@ int Main(int argc, char* argv[]) {
                         "The test will guarantee to run at least this "
                         "duration in performance mode. The duration is in ms."),
        Flag::CreateFlag("output_dir", &output_dir,
-                        "The output directory of mlperf.", Flag::kRequired)});
+                        "The output directory of mlperf.", Flag::kRequired),
+       Flag::CreateFlag("anchor_path", &anchor_path,
+                        "If running the detection task, path to the anchor "
+                        "file.")});
 
   // Command Line Flags for backend.
   std::unique_ptr<Backend> backend;
@@ -177,18 +180,23 @@ int Main(int argc, char* argv[]) {
                      ? 1
                      : setting_list.benchmark_setting().batch_size();
 
+        bool is_detection = (dataset_type == DatasetConfig::COCO);
         ExternalBackend* external_backend = new ExternalBackend(
-            model_file_path, lib_path, setting_list, native_lib_path);
+            model_file_path, lib_path, setting_list, native_lib_path,
+            is_detection, anchor_path);
         backend.reset(external_backend);
       }
     }
       break;
     case BackendType::IREE: {
       LOG(INFO) << "Using IREE Backend.";
+      std::string benchmark_id;
       std::string iree_module_path;
       std::string lib_path;
       std::string function_inputs;
       std::string function_outputs;
+      std::string function_output_scales;
+      std::string function_output_zero_points;
       std::string driver;
       flag_list.insert(
           flag_list.end(),
@@ -201,10 +209,19 @@ int Main(int argc, char* argv[]) {
            Flag::CreateFlag("driver",
                             &driver,
                             "The driver to use e.g. dylib, dylib-sync, vulkan."),
+           Flag::CreateFlag("benchmark_id",
+                            &benchmark_id,
+                            "The benchmark id to use."),
            Flag::CreateFlag("function_inputs", &function_inputs,
                             "The inputs to the module e.g. 1x224x224x3xui8"),
            Flag::CreateFlag("function_outputs", &function_outputs,
-                            "The inputs to the module e.g. 1x1001xui8")});
+                            "The inputs to the module e.g. 1x1001xui8"),
+           Flag::CreateFlag("function_output_scales",
+                            &function_output_scales,
+                            "A comma-separated list of scales corresponding to each output tensor, used to dequantize values."),
+           Flag::CreateFlag("function_output_zero_points",
+                            &function_output_zero_points,
+                            "A comma-separated list of zero points corresponding to each output tensor, used to dequantize values.")});
 
       if (Flags::Parse(&argc, const_cast<const char**>(argv), flag_list)) {
         const char* pbdata;
@@ -214,16 +231,19 @@ int Main(int argc, char* argv[]) {
         BackendSetting backend_setting;
         google::protobuf::TextFormat::ParseFromString(pbdata, &backend_setting);
 
-        std::string benchmark_id;
-        switch (dataset_type) {
-          case DatasetConfig::SQUAD:benchmark_id = "squad";
-            break;
-          case DatasetConfig::IMAGENET:benchmark_id = "imagenet";
-            break;
-          case DatasetConfig::ADE20K:benchmark_id = "ade20k";
-            break;
-          default:LOG(INFO) << "Not yet supported";
-            break;
+        if (benchmark_id.empty()) {
+          switch (dataset_type) {
+            case DatasetConfig::SQUAD:benchmark_id = "squad";
+              break;
+            case DatasetConfig::IMAGENET:benchmark_id = "imagenet";
+              break;
+            case DatasetConfig::ADE20K:benchmark_id = "ade20k";
+              break;
+            case DatasetConfig::COCO:benchmark_id = "coco_quantized";
+              break;
+            default:LOG(INFO) << "Not yet supported";
+              break;
+          }
         }
 
         SettingList setting_list =
@@ -243,14 +263,28 @@ int Main(int argc, char* argv[]) {
             LOG(INFO) << "Overriding function_outputs with: "
                       << function_outputs;
           }
+          if (!function_output_scales.empty()
+              && custom_setting.id() == "function_output_scales") {
+            *custom_setting.mutable_value() == function_output_scales;
+            LOG(INFO) << "Overriding function_output_scales with: "
+                      << function_output_scales;
+          }
+          if (!function_output_zero_points.empty()
+              && custom_setting.id() == "function_output_zero_points") {
+            *custom_setting.mutable_value() == function_output_zero_points;
+            LOG(INFO) << "Overriding function_output_zero_points with: "
+                      << function_output_zero_points;
+          }
           if (!driver.empty() && custom_setting.id() == "driver") {
             *custom_setting.mutable_value() = driver;
             LOG(INFO) << "Overriding driver with: " << driver;
           }
         }
 
+        bool is_detection = (dataset_type == DatasetConfig::COCO);
         ExternalBackend* external_backend = new ExternalBackend(
-            iree_module_path, lib_path, setting_list, "");
+            iree_module_path, lib_path, setting_list, "", is_detection,
+            anchor_path);
         backend.reset(external_backend);
       }
     }
